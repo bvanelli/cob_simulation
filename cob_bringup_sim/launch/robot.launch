@@ -16,8 +16,10 @@
 
 	<!-- startup simulated world -->
       <include file="$(find gazebo_ros)/launch/empty_world.launch">
-          <arg name="world_name" value="$(find cob_gazebo_worlds)/urdf/$(arg robot_env)/$(arg robot_env).sdf"/>
+         <!-- <arg name="world_name" value="$(find cob_gazebo_worlds)/urdf/$(arg robot_env)/$(arg robot_env).sdf"/> -->
     </include>
+    
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find cob_gazebo_worlds)/urdf/$(arg robot_env)/$(arg robot_env).sdf -sdf -model $(arg robot_env)" />
     
 	<!-- startup simulated robot -->
 	<include file="$(find cob_gazebo)/launch/robot.launch" >
