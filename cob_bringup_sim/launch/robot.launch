@@ -15,16 +15,10 @@
 	<arg name="gui" default="true"/>
 
 	<!-- startup simulated world -->
-	<include file="$(find cob_gazebo_worlds)/launch/world.launch">
-		<arg name="robot_env" value="$(arg robot_env)" />
-		<arg name="pkg_env_config" value="$(arg pkg_env_config)" />
-		<arg name="pkg_gazebo_worlds" value="$(arg pkg_gazebo_worlds)" />
-		<arg name="world_name" value="$(arg world_name)"/>
-		<arg name="paused" value="$(arg paused)" />
-		<arg name="use_sim_time" value="$(arg use_sim_time)" />
-		<arg name="gui" value="$(arg gui)" />
-	</include>
-
+      <include file="$(find gazebo_ros)/launch/empty_world.launch">
+          <arg name="world_name" value="$(find cob_gazebo_worlds)/urdf/$(arg robot_env)/$(arg robot_env).sdf"/>
+    </include>
+    
 	<!-- startup simulated robot -->
 	<include file="$(find cob_gazebo)/launch/robot.launch" >
 		<arg name="robot" value="$(arg robot)" />
