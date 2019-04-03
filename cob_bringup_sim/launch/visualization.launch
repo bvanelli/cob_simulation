@@ -1,0 +1,13 @@
+<launch>
+
+    <arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+
+    <!-- Upload robot config-->
+    <include file="$(find cob_hardware_config)/upload_robot.launch">
+		<arg name="robot" value="$(arg robot)"/>
+    </include>
+
+    <!-- Launch rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find cob_bringup_sim)/rviz/mapping.rviz" />
+
+</launch>
