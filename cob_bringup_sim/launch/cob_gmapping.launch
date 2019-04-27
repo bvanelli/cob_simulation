@@ -2,6 +2,7 @@
   <!-- dynamic map generation from unified scan -->
   <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
     <remap from="scan" to="scan_unified"/>
+    <param name="map_update_interval" value="5.0"/>
     <param name="maxUrange" type="int" value="8"/>
     <param name="xmin" type="int" value="-8"/>
     <param name="ymin" type="int" value="-8"/>
