@@ -12,7 +12,7 @@
   <include file="$(find cob_bringup_sim)/launch/cob_$(arg slam).xml" />
 
   <!-- Play bag data with clock -->
-  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -d 5 $(find cob_bringup_sim)/bags/$(arg bag).bag"/>
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -q -d 5 $(find cob_bringup_sim)/bags/$(arg bag).bag"/>
 
   <!-- Show visualization if requested -->
   <arg name="rviz" default="false"/>
