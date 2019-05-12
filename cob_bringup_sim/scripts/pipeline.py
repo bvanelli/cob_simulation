@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import rospy
+import os
+import psutil
 import tf
 import numpy as np
 import geometry_msgs.msg
@@ -13,6 +15,11 @@ import matplotlib.pyplot as plt
 class PoseComparison:
 
     def __init__(self):
+        # list of poses and counter
+        self.pose_history = list()
+        self.i = 0
+        # setup cpu logger to log slam effort
+        self.cpu_history = list()
         # register shutdown hooks
         rospy.on_shutdown(self.shutdown)
         # tf utils
@@ -25,9 +32,17 @@ class PoseComparison:
         rospy.Subscriber('/tf', TFMessage, self.tf_callback, queue_size=1)
         # store last pose
         self.last_pose = Transform()
-        # list of poses
-        self.pose_history = list()
-        self.i = 0
+
+        # all nodes are named /slam_mapping so look for pid
+        self.slam_pid = int(os.popen('rosnode info /slam_mapping 2>/dev/null | grep Pid| cut -d\' \' -f2').read())
+        self.slam_process = psutil.Process(pid=self.slam_pid)
+        rospy.Timer(rospy.Duration(0.1), self.cpu_logger)
+
+    def cpu_logger(self, event):
+        cpu_entry = dict()
+        cpu_entry['cpu'] = self.slam_process.cpu_percent()
+        cpu_entry['memory'] = self.slam_process.memory_full_info().uss
+        self.cpu_history.append(cpu_entry)
 
     def ground_truth_callback(self, odometry):
         # Function that republishes ground truth data as a tf with extrapolation
@@ -73,6 +88,7 @@ class PoseComparison:
         plt.scatter(vertices[:, 0], vertices[:, 1])
         plt.scatter(vertices[:, 2], vertices[:, 3], c='red')
         plt.show()
+        print('CPU Usage', self.cpu_history)
 
 
 if __name__ == "__main__":
