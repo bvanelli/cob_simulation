@@ -1,6 +1,6 @@
 <launch>
   <!-- dynamic map generation from unified scan -->
-  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+  <node pkg="gmapping" type="slam_gmapping" name="slam_mapping" output="screen">
     <remap from="scan" to="scan_unified"/>
     <param name="map_update_interval" value="5.0"/>
     <param name="maxUrange" value="8"/>

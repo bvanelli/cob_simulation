@@ -20,6 +20,8 @@ class PoseComparison:
         self.br = tf.TransformBroadcaster()
         # subscribers
         rospy.Subscriber('/base_pose_ground_truth', Odometry, self.ground_truth_callback, queue_size=1)
+        # wait for first transform to be published to set up tf callback
+        self.tl.waitForTransform('map', 'ground_truth', rospy.Time(), rospy.Duration(5.0))
         rospy.Subscriber('/tf', TFMessage, self.tf_callback, queue_size=1)
         # store last pose
         self.last_pose = Transform()

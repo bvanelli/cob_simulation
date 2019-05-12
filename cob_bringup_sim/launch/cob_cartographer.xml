@@ -3,7 +3,7 @@
   <arg name="configuration_basename" default="cartographer.lua"/>
 
   <!-- cartographer_node -->
-  <node pkg="cartographer_ros" type="cartographer_node" name="cartographer_node"
+  <node pkg="cartographer_ros" type="cartographer_node" name="slam_mapping"
         args="-configuration_directory $(find cob_bringup_sim)/launch
               -configuration_basename $(arg configuration_basename)"
         output="screen">
