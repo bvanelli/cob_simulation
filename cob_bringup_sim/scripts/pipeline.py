@@ -19,7 +19,9 @@ class PoseComparison:
         self.pose_history = list()
         self.i = 0
         # setup cpu logger to log slam effort
-        self.cpu_history = list()
+        self.cpu_history = dict()
+        self.cpu_history['cpu'] = list()
+        self.cpu_history['memory'] = list()
         # register shutdown hooks
         rospy.on_shutdown(self.shutdown)
         # tf utils
@@ -39,10 +41,8 @@ class PoseComparison:
         rospy.Timer(rospy.Duration(0.1), self.cpu_logger)
 
     def cpu_logger(self, event):
-        cpu_entry = dict()
-        cpu_entry['cpu'] = self.slam_process.cpu_percent()
-        cpu_entry['memory'] = self.slam_process.memory_full_info().uss
-        self.cpu_history.append(cpu_entry)
+        self.cpu_history['cpu'].append(self.slam_process.cpu_percent())
+        self.cpu_history['memory'].append(self.slam_process.memory_full_info().uss)
 
     def ground_truth_callback(self, odometry):
         # Function that republishes ground truth data as a tf with extrapolation
