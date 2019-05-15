@@ -10,6 +10,7 @@ from nav_msgs.msg import Odometry
 from tf2_msgs.msg import TFMessage
 from geometry_msgs.msg import Transform, TransformStamped
 import matplotlib.pyplot as plt
+import itertools
 
 
 class PoseComparison:
@@ -27,14 +28,13 @@ class PoseComparison:
         # tf utils
         self.tl = tf.TransformListener(rospy.Duration(5))
         self.br = tf.TransformBroadcaster()
+        # store last pose
+        self.last_pose = Transform()
         # subscribers
         rospy.Subscriber('/base_pose_ground_truth', Odometry, self.ground_truth_callback, queue_size=1)
         # wait for first transform to be published to set up tf callback
         self.tl.waitForTransform('map', 'ground_truth', rospy.Time(), rospy.Duration(5.0))
         rospy.Subscriber('/tf', TFMessage, self.tf_callback, queue_size=1)
-        # store last pose
-        self.last_pose = Transform()
-
         # all nodes are named /slam_mapping so look for pid
         self.slam_pid = int(os.popen('rosnode info /slam_mapping 2>/dev/null | grep Pid| cut -d\' \' -f2').read())
         self.slam_process = psutil.Process(pid=self.slam_pid)
@@ -43,6 +43,9 @@ class PoseComparison:
     def cpu_logger(self, event):
         self.cpu_history['cpu'].append(self.slam_process.cpu_percent())
         self.cpu_history['memory'].append(self.slam_process.memory_full_info().uss)
+        # also log during execution
+        rospy.loginfo_throttle(5, 'Average CPU Usage: {}%'.format(np.average(np.array(self.cpu_history['cpu']))))
+        rospy.loginfo_throttle(5, 'Average Memory Usage: {} MB'.format(np.average(np.array(self.cpu_history['memory']))//1024.0/1024.0))
 
     def ground_truth_callback(self, odometry):
         # Function that republishes ground truth data as a tf with extrapolation
@@ -84,11 +87,47 @@ class PoseComparison:
             angles[index, 1] = tf.transformations.euler_from_quaternion(entry['slam'][1])[2]
         print('Vertices are', vertices)
         print('Angles are', angles)
+        # plot pose trajectory
         plt.axis('equal')
         plt.scatter(vertices[:, 0], vertices[:, 1])
         plt.scatter(vertices[:, 2], vertices[:, 3], c='red')
         plt.show()
+        # calculate trajectory disparity
+        size = range(len(self.pose_history))
+        combinations = list(itertools.product(size, size))
+        accumulated_disparity = 0.0
+        for entry in combinations:
+            disparity = vertices[entry[1], :] - vertices[entry[0], :]
+            disparity_error = disparity[:2] - disparity[2:]
+            accumulated_disparity = accumulated_disparity + np.dot(disparity_error, disparity_error)
+        accumulated_disparity = accumulated_disparity/len(combinations)
+        # calculate angle disparity
+        accumulated_angle_disparity = 0.0
+        for entry in combinations:
+            angle_disparity = angles[entry[1], :] - angles[entry[0], :]
+            angle_disparity_error = angle_disparity[0] - angle_disparity[1]
+            accumulated_angle_disparity = accumulated_angle_disparity + angle_disparity_error ** 2
+        accumulated_angle_disparity = accumulated_angle_disparity/len(combinations)
+        # calculate standard squared error
+        pose_error_squared = np.sum((vertices[:, :2] - vertices[:, 2:]) ** 2)/len(self.pose_history)
+        angle_error_squared = np.sum((angles[:, 0] - angles[:, 1]) ** 2)/len(self.pose_history)
+        # print cpu usage object
         print('CPU Usage', self.cpu_history)
+        # plot cpu usage
+        plt.subplot(2, 1, 1)
+        plt.plot(np.array(self.cpu_history['cpu']), '.-')
+        plt.ylabel('CPU Usage (%)')
+        plt.subplot(2, 1, 2)
+        plt.plot(np.array(self.cpu_history['memory'])/1024.0/1024.0, '.-', c='red')
+        plt.ylabel('Memory Usage (MB)')
+        plt.show()
+        print('\nSummary\n')
+        print('Average CPU Usage: ', np.average(np.array(self.cpu_history['cpu'])), '%')
+        print('Average Memory Usage: ', np.average(np.array(self.cpu_history['memory']))//1024.0/1024.0, 'MB')
+        print('Pose disparity ', accumulated_disparity)
+        print('Angle disparity: ', accumulated_angle_disparity)
+        print('Pose squared error', pose_error_squared)
+        print('Angle squared error', angle_error_squared)
 
 
 if __name__ == "__main__":
