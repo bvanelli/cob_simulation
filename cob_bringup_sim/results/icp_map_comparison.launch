@@ -1,0 +1,14 @@
+<launch>
+
+  <!-- define arguments -->
+  <arg name="map" default="test1"/>
+  <arg name="slam" default="gmapping">
+  <arg name="result_map" default="test1"/>
+
+  <!-- Call ICP comparison node -->
+  <node pkg="cob_bringup_sim" type="icp_map_comparison.py"
+    name="map_comparison" output="screen" required="True"
+    args="-i $(find cob_bringup_sim)/results/$(arg slam)/$(arg result_map).png
+          -m $(find cob_bringup_sim)/maps/$(arg map).png"/>
+
+</launch>
