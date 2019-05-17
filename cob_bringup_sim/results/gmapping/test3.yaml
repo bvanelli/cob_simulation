@@ -4,4 +4,5 @@
 ('Angle disparity: ', 6.0892739111972017e-05)
 ('Pose squared error', 0.022001251269438311)
 ('Angle squared error', 0.00055478864868066806)
+('Pixel squared error:', 0.64751518909036587)
 

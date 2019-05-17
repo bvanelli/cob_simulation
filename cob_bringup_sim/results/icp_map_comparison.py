@@ -4,6 +4,7 @@ import rospy
 import numpy as np
 import cv2
 import time
+import math
 import icp
 import argparse
 import matplotlib.pyplot as plt
@@ -25,21 +26,22 @@ def read_image(im):
     return points
 
 
-def test_match(map_name, image_name, tolerance):
+def test_match(map_name, image_name, tolerance, black_threshold):
     im_model_raw = cv2.imread(map_name, cv2.IMREAD_GRAYSCALE)
     _, im_model = cv2.threshold(
         im_model_raw, 254, 255, cv2.THRESH_BINARY)
 
     im_raw = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)
-    _, im = cv2.threshold(im_raw, 1, 255, cv2.THRESH_BINARY)
+    _, im = cv2.threshold(im_raw, black_threshold, 255, cv2.THRESH_BINARY)
 
     points_model = read_image(im_model)
     points = read_image(im)
 
     np.random.shuffle(points_model)
     extension = points.shape[0] - points_model.shape[0]
+    repetitions = math.ceil(float(extension)/len(points_model))
     points_model_upsampled = np.append(
-        points_model, points_model[0:extension, :], axis=0)
+        points_model, np.repeat(points_model, repetitions, axis=0)[0:extension, :], axis=0)
 
     T, distances, iterations = icp.icp(
         points, points_model_upsampled, tolerance=tolerance)
@@ -76,6 +78,8 @@ if __name__ == "__main__":
                         help='The input image name.')
     parser.add_argument('-t', '--tolerance', type=float,
                         help='ICP tolerance (default is 0.0001).', default=0.0001)
+    parser.add_argument('-b', '--threshold', type=int,
+                        help='Binarize black threshold (default is 1).', default=50)
     args, _ = parser.parse_known_args()
 
-    test_match(args.map, args.image, args.tolerance)
+    test_match(args.map, args.image, args.tolerance, args.threshold)
