@@ -1,0 +1,7 @@
+('Average CPU Usage: ', 12.047545626179989, '%')
+('Average Memory Usage: ', 19.8837890625, 'MB')
+('Pose disparity ', 0.015545013427104635)
+('Angle disparity: ', 6.0892739111972017e-05)
+('Pose squared error', 0.022001251269438311)
+('Angle squared error', 0.00055478864868066806)
+

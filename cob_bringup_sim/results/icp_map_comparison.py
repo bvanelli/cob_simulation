@@ -59,8 +59,8 @@ def test_match(map_name, image_name, tolerance):
 
     print('Number of iterations:', iterations)
 
-    plt.plot(points_model[:, 0], points_model[:, 1], 'ro',
-             points_transformed[:, 0], points_transformed[:, 1], 'bo')
+    plt.plot(points_transformed[:, 0], points_transformed[:, 1], 'bo')
+    plt.plot(points_model[:, 0], points_model[:, 1], 'ro')
     plt.axis('equal')
     plt.show()
 
