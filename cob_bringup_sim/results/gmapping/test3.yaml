@@ -5,4 +5,5 @@
 ('Pose squared error', 0.022001251269438311)
 ('Angle squared error', 0.00055478864868066806)
 ('Pixel squared error:', 0.64751518909036587)
+('Free space mapping error', 3.90207186150616, '%')
 

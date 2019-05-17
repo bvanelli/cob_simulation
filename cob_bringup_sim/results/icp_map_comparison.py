@@ -29,7 +29,7 @@ def read_image(im):
 def test_match(map_name, image_name, tolerance, black_threshold):
     im_model_raw = cv2.imread(map_name, cv2.IMREAD_GRAYSCALE)
     _, im_model = cv2.threshold(
-        im_model_raw, 254, 255, cv2.THRESH_BINARY)
+        im_model_raw, 1, 255, cv2.THRESH_BINARY)
 
     im_raw = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)
     _, im = cv2.threshold(im_raw, black_threshold, 255, cv2.THRESH_BINARY)
@@ -52,6 +52,16 @@ def test_match(map_name, image_name, tolerance, black_threshold):
 
     # Transform C
     points_transformed = np.dot(T, points_transformed.T).T
+
+    # finally calculate free area difference
+    _, im_free = cv2.threshold(im_raw, 240, 255, cv2.THRESH_BINARY)
+    cv2.imshow('image', im_free)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    white_pixels = np.sum(im_free == 255)
+    white_pixels_model = np.sum(im_model_raw == 255)
+    white_space_error = abs(white_pixels_model - white_pixels)
+    print('Free space mapping error', float(white_space_error)/white_pixels_model*100, '%')
 
     print('Transformation Matrix:', T)
 
