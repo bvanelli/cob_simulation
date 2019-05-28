@@ -60,7 +60,7 @@ def test_match(map_name, image_name, tolerance, black_threshold):
     cv2.destroyAllWindows()
     white_pixels = np.sum(im_free == 255)
     white_pixels_model = np.sum(im_model_raw == 255)
-    white_space_error = abs(white_pixels_model - white_pixels)
+    white_space_error = white_pixels_model - white_pixels
     print('Free space mapping error', float(white_space_error)/white_pixels_model*100, '%')
 
     print('Transformation Matrix:', T)
